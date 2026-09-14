@@ -12,6 +12,10 @@ user_router = APIRouter(prefix="/user")
 def register(body: UserSchema, db: Session = Depends(get_db)):
     return controller.register(body, db)
 
-@user_router.post("/login", response_model=TokenResponseSchema, status_code=status.HTTP_200_OK)
+@user_router.post(
+    "/login",
+    response_model=TokenResponseSchema,
+    status_code=status.HTTP_200_OK
+)
 def login(body: UserLoginSchema, db: Session = Depends(get_db)):
-    return controller.login(body, db) 
+    return controller.login(body, db)
