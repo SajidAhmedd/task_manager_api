@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, status
-from src.user.tasks import controller
-from src.user.tasks.dtos import TaskSchema, TaskResponseSchema
-from src.user.utils.db import get_db
+from src.tasks import controller
+from src.tasks.dtos import TaskSchema, TaskResponseSchema
+from src.utils.db import get_db
 from typing import List
 from sqlalchemy.orm import Session
 

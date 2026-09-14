@@ -1,6 +1,6 @@
-from src.user.tasks.dtos import TaskSchema
+from src.tasks.dtos import TaskSchema
 from sqlalchemy.orm import Session
-from src.user.tasks.models import TaskModel
+from src.tasks.models import TaskModel
 from fastapi import HTTPException, status
 
 def create_task(body: TaskSchema, db: Session):
