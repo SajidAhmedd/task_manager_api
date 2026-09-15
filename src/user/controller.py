@@ -1,13 +1,12 @@
 from datetime import datetime, timedelta, timezone
-
 import jwt
-from fastapi import HTTPException, status
+from fastapi import HTTPException, status, Request
 from pwdlib import PasswordHash
 from sqlalchemy.orm import Session
-
 from src.user.dtos import UserSchema, UserLoginSchema
 from src.user.models import UserModel
 from src.utils.settings import settings
+from src.utils import db
 
 
 password_hasher = PasswordHash.recommended()
@@ -22,9 +21,7 @@ def verify_password(plain_password: str, hashed_password: str):
 
 
 def exp_time():
-    return datetime.now(timezone.utc) + timedelta(
-        minutes=settings.EXPIRE_MINUTES
-    )
+    return datetime.now(timezone.utc) + timedelta(minutes=settings.EXPIRE_MINUTES)
 
 
 def register(body: UserSchema, db: Session):
@@ -85,3 +82,42 @@ def login(body: UserLoginSchema, db: Session):
     )
 
     return {"token": token}
+
+
+def is_authenticated(request: Request, db: Session):
+    auth_header = request.headers.get("Authorization")
+    if not auth_header:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authorization header missing"
+        )
+
+    token = auth_header.split(" ")[1]
+    try:
+        payload = jwt.decode(
+            token,
+            settings.SECRET_KEY,
+            algorithms=[settings.ALGORITHM]
+        )    
+        user_id = payload.get("user_id")
+        user = db.query(UserModel).filter(
+            UserModel.id == user_id
+        ).first()
+
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="User not found"
+            )
+        return user
+    
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token has expired"
+        )
+    except jwt.InvalidTokenError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token"
+        )
