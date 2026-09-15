@@ -29,6 +29,12 @@ def get_one_task(task_id: int, db: Session):
     
     return one_task
     
+def get_tasks_new(user: UserModel, db: Session):
+    tasks = db.query(TaskModel).filter(
+        TaskModel.user_id == user.id
+    ).all()
+
+    return tasks
     
 def update_task(body: TaskSchema, task_id: int, db: Session):
     one_task = db.query(TaskModel).get(task_id)

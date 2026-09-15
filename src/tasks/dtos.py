@@ -12,3 +12,4 @@ class TaskResponseSchema(TaskSchema):
     title: str
     description: str
     is_completed: bool
+    user_id: int
